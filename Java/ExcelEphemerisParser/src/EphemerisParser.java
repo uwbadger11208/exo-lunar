@@ -278,7 +278,7 @@ public class EphemerisParser {
 				// go through ephemeris until at start of current night
 				boolean found = false;
 				while (!found && !ephem.isClosed()) {
-					Date ephemDate = ephem.getDateTime();
+					Date ephemDate = ephem.getDate();
 
 					// if date matches, we're there!
 					if (dateFormatter.format(ephemDate).equals(night.getSheetName()))
