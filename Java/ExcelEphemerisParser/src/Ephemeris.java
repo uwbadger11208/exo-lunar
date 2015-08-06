@@ -31,7 +31,7 @@ public class Ephemeris {
 			+ "STEP_SIZE=%271%20m%27";
 
 	private Scanner ephem; // to get lines from ephemeris
-	private String[] current; // the current line of the ephemeris, split by spaces
+	protected String[] current; // the current line of the ephemeris, split by spaces
 	private boolean closed; // whether ephem has been closed
 
 	// class constants - indices of ephemeris rows
@@ -188,39 +188,57 @@ public class Ephemeris {
 					"Provided file contains no lines of ephemeris data");
 
 	}
-
-	public Ephemeris(Date start, Date end) throws IOException {
-
+	
+	public Ephemeris(Date[] dates, String urlBase) throws IOException {
 		// check for null values
-		if (start == null || end == null)
+		if (dates == null)
 			throw new IllegalArgumentException("Null values not accepted"
 					+ " as a parameter for Ephemeris constructor");
 
-		// check if date range is too long
-		Date mid = end;
-		List<Date> ephDates = new LinkedList<Date>();
-
-		if (((mid.getTime() - start.getTime()) / MIL_PER_MIN) > MIN_PER_35_DAYS) {
-			while (((mid.getTime() - start.getTime()) / MIL_PER_MIN) > MIN_PER_35_DAYS) {
-				ephDates.add(0,mid);
-				mid = new Date(mid.getTime() - ((long) MIL_PER_MIN)*((long) MIN_PER_35_DAYS));
+		// get ephemeris ranges
+		List<Date[]> ephDates = new LinkedList<Date[]>();
+		
+		Date startDate = dates[0];
+		Date endDate = null;
+		SimpleDateFormat dateFormatter = new SimpleDateFormat(DATE_FORMAT);
+		System.out.println();
+		boolean first = true;
+		for (int i = 0; i < dates.length; i++) {
+			if (first) {
+				startDate = dates[i];
+				first = false;
+			} else if (dates[i].getTime() - dates[i-1].getTime() > 3*24*60*MIL_PER_MIN) {
+				endDate = dates[i-1];
+				Date[] period = new Date[2];
+				period[0] = startDate;
+				period[1] = endDate;
+				ephDates.add(period);
+				startDate = dates[i];
+				for (int j = 0; j < period.length; j++)
+					System.out.print(dateFormatter.format(period[j]) + " ");
+				System.out.println();
 			}
-			ephDates.add(0,start);
-
-			System.out.println("divided into " + (ephDates.size()-1) + " time periods...");
-		} else {
-			ephDates.add(0,end);
-			ephDates.add(0,start);
-
-			System.out.println("collected into a single period...");
+			if (i == dates.length - 1) {
+				endDate = dates[i];
+				Date[] period = new Date[2];
+				period[0] = startDate;
+				period[1] = endDate;
+				ephDates.add(period);
+				for (int j = 0; j < period.length; j++)
+					System.out.print(dateFormatter.format(period[j]) + " ");
+				System.out.println();
+			}
 		}
+		System.out.println("divided into " + (ephDates.size()) + " periods...");
 
 		// construct string builder from which to make scanner
 		String line = "";
 		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i <= ephDates.size() - 2; i++) {
+		int i = 0;
+		for (Date[] period : ephDates) {
 			System.out.print("\nacquiring Period " + (i+1) + " ephemeris...");
-			URL url = new URL(Ephemeris.ephRequest(ephDates.get(i),ephDates.get(i+1)));
+			i++;
+			URL url = new URL(Ephemeris.ephRequest(urlBase,period));
 			Scanner in = new Scanner(url.openStream());
 			System.out.println("done");
 			// skip header info
@@ -256,6 +274,7 @@ public class Ephemeris {
 		if (current[0].equals("$$EOE"))
 			throw new IllegalArgumentException(
 					"Provided file contains no lines of ephemeris data");
+
 	}
 
 	/**
@@ -947,8 +966,12 @@ public class Ephemeris {
 	}
 	
 	public static String ephRequest(Date[] period) {
+		return ephRequest(JPL_URL,period);
+	}
+	
+	public static String ephRequest(String urlBase, Date[] period) {
 		DateFormat df = new SimpleDateFormat(DATE_FORMAT);
-		return JPL_URL + "&START_TIME=%27" + df.format(period[0]) + "%27&STOP_TIME=%27" +
+		return urlBase + "&START_TIME=%27" + df.format(period[0]) + "%27&STOP_TIME=%27" +
 		df.format(period[1]) + "-23:59%27";
 	}
 
