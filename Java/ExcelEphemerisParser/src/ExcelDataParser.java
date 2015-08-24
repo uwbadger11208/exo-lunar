@@ -41,7 +41,16 @@ public class ExcelDataParser {
 	public static final int SOT = 22;
 	public static final int L_OR_T = 23;
 	public static final int STO = 24;
-	public static final int N_PARAMS = 25;
+	public static final int OFF_CRAT = 25;
+	public static final int OFF_EW_DIST = 26;
+	public static final int OFF_NS_DIST = 27;
+	public static final int OFF_ORIG = 28;
+	public static final int LINE_DEPTH = 29;
+	public static final int FOV_LON = 30;
+	public static final int FOV_LAT = 31;
+	public static final int FOV_ALT = 32;
+	public static final int FOV = 33;
+	public static final int N_PARAMS = 34;
 
 	public static final int BLANK = -1;
 	
@@ -74,10 +83,15 @@ public class ExcelDataParser {
 			INDICES[i] = -1;
 
 		// go through headers, finding column indices
-		for (int i = 0; i < headers.getLastCellNum(); i++) {
+		int numOfCols = Math.max(headers.getLastCellNum(), 
+				log.getRow(headers.getRowNum() + 1).getLastCellNum());
+		for (int i = 0; i < numOfCols; i++) {
 			Cell c = headers.getCell(i);
 			int info = getInfoIndex(c);
 			if (info != BLANK) {
+				if (INDICES[info] != -1) {
+					throw new ExcelDataParserException("Duplicate header");
+				}
 				INDICES[info] = c.getColumnIndex();
 			}
 		}
@@ -143,6 +157,24 @@ public class ExcelDataParser {
 				message += "L/T\n";
 			if (INDICES[STO] == -1)
 				message += "S-T-O\n";
+			if (INDICES[OFF_CRAT] == -1)
+				message += "Offset Crater\n";
+			if (INDICES[OFF_EW_DIST] == -1)
+				message += "Offset E/W Dist\n";
+			if (INDICES[OFF_NS_DIST] == -1)
+				message += "Offset N/S Dist\n";
+			if (INDICES[OFF_ORIG] == -1)
+				message += "Offset Origin\n";
+			if (INDICES[LINE_DEPTH] == -1)
+				message += "Line Depth\n";
+			if (INDICES[FOV_LON] == -1)
+				message += "FOV Longitude\n";
+			if (INDICES[FOV_LAT] == -1)
+				message += "FOV Latitude\n";
+			if (INDICES[FOV_ALT] == -1)
+				message += "FOV Altitude\n";
+			if (INDICES[FOV] == -1)
+				message += "FOV\n";
 
 			throw new ExcelDataParserException(message);
 		}
@@ -216,7 +248,7 @@ public class ExcelDataParser {
 
 			// if blank, get text from cell below
 			if (below.getCellType() == Cell.CELL_TYPE_STRING) {
-				header = below.getStringCellValue();
+				header = below.getStringCellValue().replaceAll("\\s","");
 			} else {
 				return BLANK;
 			}
@@ -227,7 +259,7 @@ public class ExcelDataParser {
 			if (header == null) {
 
 				// get cell value
-				header = c.getStringCellValue();
+				header = c.getStringCellValue().replaceAll("\\s","");
 
 				/* probably don't need to get value on bottom unless top
 				 * value is missing, but I'll keep code in here just in case
@@ -254,6 +286,9 @@ public class ExcelDataParser {
 				// time taken
 			} else if (header.equals("Time")) {
 				return TIME;
+				
+			} else if (header.equals("FOV")) {
+				return FOV;
 
 				// length of exposure
 			} else if (header.equals("Expo")) {
@@ -300,7 +335,7 @@ public class ExcelDataParser {
 				return ANG_WID;
 
 				// observer longitude
-			} else if (header.equals("Observer: Sub -")) {
+			} else if (header.equals("Observer:Sub-")) {
 				return TAR_LON;
 
 				// either latitude
@@ -311,13 +346,15 @@ public class ExcelDataParser {
 
 					// check for string type
 					if (before.getCellType() == Cell.CELL_TYPE_STRING) {
-						String beforeStr = before.getStringCellValue();
+						String beforeStr = before.getStringCellValue().replaceAll("\\s","");
 
 						// get which latitude it is
-						if (beforeStr.equals("Observer: Sub -")) {
+						if (beforeStr.equals("Observer:Sub-")) {
 							return TAR_LAT;
-						} else if (beforeStr.equals("Solar:  Sub-")) {
+						} else if (beforeStr.equals("Solar:Sub-")) {
 							return SOL_LAT;
+						} else if (beforeStr.equals("FOVLocation")) {
+							return FOV_LAT;
 						} else {
 							return BLANK;
 						}
@@ -327,7 +364,7 @@ public class ExcelDataParser {
 				}
 
 				// solar longitude
-			} else if (header.equals("Solar:  Sub-")) {
+			} else if (header.equals("Solar:Sub-")) {
 				return SOL_LON;
 
 				// solar range
@@ -357,6 +394,27 @@ public class ExcelDataParser {
 				// sun-target-observer
 			} else if (header.equals("S-T-O")) {
 				return STO;
+				
+			} else if (header.equals("Offset")) {
+				return OFF_CRAT;
+				
+			} else if (header.equals("E/WDist")) {
+				return OFF_EW_DIST;
+				
+			} else if (header.equals("N/SDist")) {
+				return OFF_NS_DIST;
+				
+			} else if (header.equals("Origin")) {
+				return OFF_ORIG;
+				
+			} else if (header.equals("Line")) {
+				return LINE_DEPTH;
+				
+			} else if (header.equals("FOVLocation")) {
+				return FOV_LON;
+				
+			} else if (header.equals("Altitude(km)")) {
+				return FOV_ALT;
 
 				// everything else
 			} else {

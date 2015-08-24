@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.Date;
 import java.util.TimeZone;
+import static java.lang.Math.cos;
+import static java.lang.Math.pow;
 
 /**
  * This class represents a JPL Ephemeris file.
@@ -30,9 +32,10 @@ public class Ephemeris {
 			+ "CSV_FORMAT=%27NO%27&"
 			+ "STEP_SIZE=%271%20m%27";
 
-	private Scanner ephem; // to get lines from ephemeris
+	protected Scanner ephem; // to get lines from ephemeris
 	protected String[] current; // the current line of the ephemeris, split by spaces
-	private boolean closed; // whether ephem has been closed
+	protected boolean closed; // whether ephem has been closed
+	LibrationEphemeris libra; // keep track of libration
 
 	// class constants - indices of ephemeris rows
 	public static final int DATE = 0;
@@ -109,7 +112,7 @@ public class Ephemeris {
 
 		// get ephemeris ranges
 		List<Date[]> ephDates = new LinkedList<Date[]>();
-		
+
 		Date startDate = dates[0];
 		Date endDate = null;
 		SimpleDateFormat dateFormatter = new SimpleDateFormat(DATE_FORMAT);
@@ -130,6 +133,7 @@ public class Ephemeris {
 					System.out.print(dateFormatter.format(period[j]) + " ");
 				System.out.println();
 			}
+			
 			if (i == dates.length - 1) {
 				endDate = dates[i];
 				Date[] period = new Date[2];
@@ -141,14 +145,14 @@ public class Ephemeris {
 				System.out.println();
 			}
 		}
-		System.out.println("divided into " + (ephDates.size()) + " periods...");
+		System.out.println("selenocentric origin: divided into " + (ephDates.size()) + " periods...");
 
 		// construct string builder from which to make scanner
 		String line = "";
 		StringBuilder sb = new StringBuilder();
 		int i = 0;
 		for (Date[] period : ephDates) {
-			System.out.print("\nacquiring Period " + (i+1) + " ephemeris...");
+			System.out.print("\nacquiring Period " + (i+1) + " selenocentric origin ephemeris...");
 			i++;
 			URL url = new URL(Ephemeris.ephRequest(period));
 			Scanner in = new Scanner(url.openStream());
@@ -187,8 +191,11 @@ public class Ephemeris {
 			throw new IllegalArgumentException(
 					"Provided file contains no lines of ephemeris data");
 
+		// get libration data
+		libra = new LibrationEphemeris(dates);
+
 	}
-	
+
 	public Ephemeris(Date[] dates, String urlBase) throws IOException {
 		// check for null values
 		if (dates == null)
@@ -197,7 +204,7 @@ public class Ephemeris {
 
 		// get ephemeris ranges
 		List<Date[]> ephDates = new LinkedList<Date[]>();
-		
+
 		Date startDate = dates[0];
 		Date endDate = null;
 		SimpleDateFormat dateFormatter = new SimpleDateFormat(DATE_FORMAT);
@@ -229,14 +236,23 @@ public class Ephemeris {
 				System.out.println();
 			}
 		}
-		System.out.println("divided into " + (ephDates.size()) + " periods...");
+
+		String axisMess;
+		if (urlBase.equals(AxisEphemeris.X)) {
+			axisMess = "selenocentric x-axis";
+		} else if (urlBase.equals(AxisEphemeris.Z)) {
+			axisMess = "selenocentric z-axis";
+		} else {
+			axisMess = "UNKNOWN VALUE";
+		}
+		System.out.println(axisMess + ": divided into " + (ephDates.size()) + " periods...");
 
 		// construct string builder from which to make scanner
 		String line = "";
 		StringBuilder sb = new StringBuilder();
 		int i = 0;
 		for (Date[] period : ephDates) {
-			System.out.print("\nacquiring Period " + (i+1) + " ephemeris...");
+			System.out.print("\nacquiring Period " + (i+1) + " " + axisMess + " ephemeris...");
 			i++;
 			URL url = new URL(Ephemeris.ephRequest(urlBase,period));
 			Scanner in = new Scanner(url.openStream());
@@ -277,6 +293,185 @@ public class Ephemeris {
 
 	}
 
+	public Double[] getGeocentricCrater(String craterName) throws EphemerisDataMissingException, EphemerisDataParseException {
+		Double[] craterCoords = libra.getCraterCoords().get(craterName);
+		Vector moonCenter = new Vector(getDeclination()*Math.PI/180,getRightAcension()*Math.PI/180).scale(getTargetRange());
+		Vector selenoCrater = new Vector(craterCoords[1]*Math.PI/180,craterCoords[0]*Math.PI/180).scale(
+				LibrationEphemeris.LUNAR_RADIUS);
+		Vector geoCrater = coordTrans().times(
+				selenoCrater).plus(moonCenter);
+		double r1 = geoCrater.getAzi()*180/Math.PI;
+		double d1 = geoCrater.getElev()*180/Math.PI;
+		return new Double[] {r1,d1};
+	}
+	
+	public Double[] getLunarCoords(String craterName, double ew_dist, double ns_dist, String origin, double fov) 
+			throws ExcelDataParserException, EphemerisDataMissingException, EphemerisDataParseException {
+		Double[] coords = getFovRaDec(craterName,ew_dist,ns_dist,origin,fov);
+		return getLunarCoords(coords[0],coords[1]);
+	}
+
+	public Double[] getFovRaDec(String craterName, double ew_dist, double ns_dist, String origin, double fov) 
+			throws ExcelDataParserException, EphemerisDataMissingException, EphemerisDataParseException {
+		
+		String[] orig_info = origin.split(" ");
+		String orig_dist = orig_info[0];
+		String orig_dir = null;
+		if (orig_info.length == 2)
+			orig_dir = orig_info[1];
+		
+		if (orig_info.length > 2)
+			throw new ExcelDataParserException("Bad origin value");
+		
+		Double[] start;
+		switch (orig_dist) {
+		case "Crater":
+			start = getGeocentricCrater(craterName); 
+			if (start == null)
+				throw new ExcelDataParserException("Bad origin value");
+			break;
+		case "Limb":
+			if (orig_dir == null)
+				throw new ExcelDataParserException("Bad origin value");
+			start = getLimbRaDec(craterName,orig_dir,fov); break;
+		case "Edge":
+			if (orig_dir == null)
+				throw new ExcelDataParserException("Bad origin value");
+			start = getLimbRaDec(craterName,orig_dir,LibrationEphemeris.LENS_ANG_DIAM); break;
+		default:
+			throw new ExcelDataParserException("Bad origin value");
+		}
+		
+		start[0] += ew_dist / 240; // E/W in secs of time
+		start[1] += ns_dist / 60; // N/S in arcmin
+		
+		return start;
+	}
+
+	public Double[] getLimbRaDec(String craterName, String direction, double fov) 
+			throws EphemerisDataParseException, EphemerisDataMissingException, ExcelDataParserException {
+
+		double d1,r1,d0,r0;
+		r0 = getRightAcension();
+		d0 = getDeclination();
+		Vector center = new Vector(d0 * Math.PI / 180,r0 * Math.PI / 180);
+
+		Double[] craterCoords = getGeocentricCrater(craterName);
+
+		if (craterCoords == null)
+			throw new ExcelDataParserException("Bad origin value");
+		
+		r1 = craterCoords[0];
+		d1 = craterCoords[1];
+
+		String[] dirs = direction.split(",");
+		if (dirs.length != 1)
+			throw new EphemerisDataParseException("invalid limb direction");
+
+		double dotProd = cos((((fov + getAngularWidth())/2) / 3600) * Math.PI / 180);
+		double minTol = pow(10,-10);
+		double start,end,resid;
+		resid = new Vector(d1 * Math.PI / 180,r1 * Math.PI / 180).dot(center) - dotProd;
+		switch (dirs[0]) {
+		case "N":
+			start = d1;
+			end = d1;
+			while (new Vector(end * Math.PI / 180, r1 * Math.PI / 180).dot(center) - dotProd > 0)
+				end += 0.125;
+
+			resid = new Vector(((start + end) / 2) * Math.PI / 180, r1 * Math.PI / 180).dot(center) - dotProd;
+			while (Math.abs(resid) > minTol) {
+				if (resid > 0) {
+					start = (start + end) / 2;
+				} else {
+					end = (start + end) / 2;
+				}
+				resid = new Vector(((start + end) / 2) * Math.PI / 180,r1 * Math.PI / 180).dot(center) - dotProd;
+			}
+			d1 = (start + end) / 2;
+
+			break;
+		case "S":
+			start = d1;
+			end = d1;
+			while (new Vector(end * Math.PI / 180, r1 * Math.PI / 180).dot(center) - dotProd > 0)
+				end -= 0.125;
+
+			resid = new Vector(((start + end) / 2) * Math.PI / 180, r1 * Math.PI / 180).dot(center) - dotProd;
+			while (Math.abs(resid) > minTol) {
+				if (resid > 0) {
+					start = (start + end) / 2;
+				} else {
+					end = (start + end) / 2;
+				}
+				resid = new Vector(((start + end) / 2) * Math.PI / 180,r1 * Math.PI / 180).dot(center) - dotProd;
+			}
+			d1 = (start + end) / 2;
+
+			break;
+		case "E":
+			start = r1;
+			end = r1;
+			while (new Vector(d1 * Math.PI / 180, end * Math.PI / 180).dot(center) - dotProd > 0)
+				end += 0.125;
+
+			resid = new Vector(d1 * Math.PI / 180,((start + end) / 2) * Math.PI / 180).dot(center) - dotProd;
+			while (Math.abs(resid) > minTol) {
+				if (resid > 0) {
+					start = (start + end) / 2;
+				} else {
+					end = (start + end) / 2;
+				}
+				resid = new Vector(d1 * Math.PI / 180,((start + end) / 2) * Math.PI / 180).dot(center) - dotProd;
+			}
+			r1 = (start + end) / 2;
+			break;
+			
+		case "W":
+			start = r1;
+			end = r1;
+			while (new Vector(d1 * Math.PI / 180, end * Math.PI / 180).dot(center) - dotProd > 0)
+				end -= 0.125;
+
+			resid = new Vector(d1 * Math.PI / 180,((start + end) / 2) * Math.PI / 180).dot(center) - dotProd;
+			while (Math.abs(resid) > minTol) {
+				if (resid > 0) {
+					start = (start + end) / 2;
+				} else {
+					end = (start + end) / 2;
+				}
+				resid = new Vector(d1 * Math.PI / 180,((start + end) / 2) * Math.PI / 180).dot(center) - dotProd;
+			}
+			r1 = (start + end) / 2;
+	
+			break;
+		default: throw new EphemerisDataParseException("invalid limb direction");
+		}
+
+		return new Double[] {r1,d1};
+	}
+
+	public Double[] getLunarCoords(double ra, double dec) throws EphemerisDataMissingException, EphemerisDataParseException {
+		double hypo = getTargetRange();
+		double d0,r0;
+		r0 = getRightAcension();
+		d0 = getDeclination();
+		Vector moonCenter = new Vector(d0 * Math.PI / 180,r0 * Math.PI / 180);
+		Vector sightLine = new Vector(dec * Math.PI / 180,ra * Math.PI / 180);
+		double cosine = moonCenter.dot(sightLine);
+		sightLine = sightLine.scale(hypo*cosine);
+
+		Vector radialVec = sightLine.plus(moonCenter.scale(hypo).negative());
+
+		Vector lunarVec = coordTrans().transpose().times(radialVec);
+
+		double alt = lunarVec.norm() - LibrationEphemeris.LUNAR_RADIUS;
+		double lat = lunarVec.getElev() * 180 / Math.PI;
+		double lon = lunarVec.getAzi() * 180 / Math.PI;
+
+		return new Double[] {lon,lat,alt};
+	}
+
 	/**
 	 * If the ephemeris contains another line, advance the 'current' line to
 	 * that one and returns true. Otherwise, returns false and closes the
@@ -284,6 +479,8 @@ public class Ephemeris {
 	 * @return
 	 */
 	public boolean advance() {
+
+		libra.advance();
 
 		// if the scanner's closed, it can't advance
 		boolean finished = closed;
@@ -309,6 +506,11 @@ public class Ephemeris {
 		return closed;
 	}
 
+	public Matrix coordTrans() throws EphemerisDataParseException,
+	EphemerisDataMissingException {
+		return libra.coordTrans(getRightAcension(), getDeclination(), getTargetRange());
+	}
+
 	public Date getDateTime() throws EphemerisDataParseException,
 	EphemerisDataMissingException {
 		SimpleDateFormat formatter = new SimpleDateFormat(DATE_FORMAT + 
@@ -323,7 +525,7 @@ public class Ephemeris {
 			throw new EphemerisDataMissingException();
 		}
 	}
-	
+
 	public Date getDate() throws EphemerisDataParseException,
 	EphemerisDataMissingException {
 		SimpleDateFormat formatter = new SimpleDateFormat(DATE_FORMAT);
@@ -964,11 +1166,11 @@ public class Ephemeris {
 		return JPL_URL + "&START_TIME=%27" + df.format(start) + "%27&STOP_TIME=%27" +
 		df.format(end) + "%27";
 	}
-	
+
 	public static String ephRequest(Date[] period) {
 		return ephRequest(JPL_URL,period);
 	}
-	
+
 	public static String ephRequest(String urlBase, Date[] period) {
 		DateFormat df = new SimpleDateFormat(DATE_FORMAT);
 		return urlBase + "&START_TIME=%27" + df.format(period[0]) + "%27&STOP_TIME=%27" +

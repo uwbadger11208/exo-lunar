@@ -392,6 +392,7 @@ public class EphemerisParser {
 
 									if (imTimeInt > timeInt) {
 										transferData(ephem,image,parse);
+										
 										timeInt = imTimeInt;
 										lastTimeStr = timeStr;
 										System.out.println("done");
@@ -434,38 +435,16 @@ public class EphemerisParser {
 					}
 				}
 			}
+			
+			for (int ii = 0; ii < parse.INDICES.length; ii++) {
+				night.autoSizeColumn(parse.INDICES[ii]);
+			}
 		}
 
 
 		try {
 			System.out.print("writing edited excel file...");
-			/*
-			OutputStream out = null;
-			if (excelFile.indexOf(XLS) == excelFile.length() - XLS.length()) {
-				out = new FileOutputStream(excelFile);
-				log.write(out);
-				out.flush();
-				out.close();
-			} else {
-				out = new FileOutputStream(xlsx2xlsName(excelFile));
-				log.write(out);
-				out.flush();
-				out.close();
-				System.out.println("done");
-				System.out.print("saving temporary xls file as xlsx file...");
-				try {
-					xls2xlsx(excelFile,styles);
-					//new File(xlsx2xlsName(excelFile)).deleteOnExit();
-					System.out.println("done");
-				} catch (Exception exc) {
-					System.out.println("error");
-					System.out.println(exc.getMessage());
-					System.out.println("Could not save xls file as"
-							+ " xlsx file. Check format");
-					System.exit(-1);
-				}
-			}
-			*/
+			
 			OutputStream out = new FileOutputStream(excelFile);
 			log.write(out);
 			out.flush();
@@ -514,164 +493,6 @@ public class EphemerisParser {
 		}
 	}
 	
-	/*
-	
-	public static String xlsx2xlsName(String name) {
-		return "temp_" + name.substring(0,name.length()-1);
-	}
-	*/
-
-	/*/**
-	 * adapted from stack exchange "http://stackoverflow.com/questions/
-	 * 		20049922/java-poi-api-convert-from-xlsx-to-xls"
-	 */
-	/*
-	public static void xlsx2xls(String file, HashMap<Integer,XSSFCellStyle> styles) 
-			throws InvalidFormatException,IOException {
-		InputStream in = new FileInputStream(file);
-		try {
-			XSSFWorkbook wbIn = new XSSFWorkbook(in);
-			File outF = new File(xlsx2xlsName(file));
-			if (outF.exists()) {
-				outF.delete();
-			}
-
-			Workbook wbOut = new HSSFWorkbook();
-			int sheetCnt = wbIn.getNumberOfSheets();
-
-			for (int i = 0; i < sheetCnt; i++) {
-				Sheet sIn = wbIn.getSheetAt(0);
-				Sheet sOut = wbOut.createSheet(sIn.getSheetName());
-				Iterator<Row> rowIt = sIn.rowIterator();
-				while (rowIt.hasNext()) {
-					Row rowIn = rowIt.next();
-					Row rowOut = sOut.createRow(rowIn.getRowNum());
-
-					Iterator<Cell> cellIt = rowIn.cellIterator();
-					while (cellIt.hasNext()) {
-						Cell cellIn = cellIt.next();
-						Cell cellOut = rowOut.createCell(cellIn.getColumnIndex(), cellIn.getCellType());
-
-						switch (cellIn.getCellType()) {
-						case Cell.CELL_TYPE_BLANK: break;
-
-						case Cell.CELL_TYPE_BOOLEAN:
-							cellOut.setCellValue(cellIn.getBooleanCellValue());
-							break;
-
-						case Cell.CELL_TYPE_ERROR:
-							cellOut.setCellValue(cellIn.getErrorCellValue());
-							break;
-
-						case Cell.CELL_TYPE_FORMULA:
-							cellOut.setCellFormula(cellIn.getCellFormula());
-							break;
-
-						case Cell.CELL_TYPE_NUMERIC:
-							cellOut.setCellValue(cellIn.getNumericCellValue());
-							break;
-
-						case Cell.CELL_TYPE_STRING:
-							cellOut.setCellValue(cellIn.getStringCellValue());
-							break;
-						}
-						
-						CellStyle styleIn = cellIn.getCellStyle();
-						CellStyle styleOut = cellOut.getCellStyle();
-						copyCellStyle(styleOut,styleIn,cellIn.getSheet().getWorkbook());
-						cellOut.setCellComment(cellIn.getCellComment());
-
-					}
-				}
-			}
-			OutputStream out = new BufferedOutputStream(new FileOutputStream(outF));
-			try {
-				wbOut.write(out);
-			} finally {
-				out.close();
-			}
-		} finally {
-			in.close();
-		}
-	}
-	*/
-
-	/*/**
-	 * adapted copied from stack exchange "http://stackoverflow.com/questions/
-	 * 		20049922/java-poi-api-convert-from-xlsx-to-xls"
-	 */
-	/*
-	public static void xls2xlsx(String xlsxFile, HashMap<Integer,XSSFCellStyle> styles) 
-			throws InvalidFormatException,IOException {
-
-		String xlsName = xlsx2xlsName(xlsxFile); 	
-		InputStream in = new FileInputStream(xlsName);
-		try {
-			HSSFWorkbook wbIn = new HSSFWorkbook(in);
-			File outF = new File(xlsxFile);
-			if (outF.exists()) {
-				outF.delete();
-			}
-
-			Workbook wbOut = new XSSFWorkbook();
-			int sheetCnt = wbIn.getNumberOfSheets();
-			for (int i = 0; i < sheetCnt; i++) {
-				Sheet sIn = wbIn.getSheetAt(0);
-				Sheet sOut = wbOut.createSheet(sIn.getSheetName());
-				Iterator<Row> rowIt = sIn.rowIterator();
-				while (rowIt.hasNext()) {
-					Row rowIn = rowIt.next();
-					Row rowOut = sOut.createRow(rowIn.getRowNum());
-
-					Iterator<Cell> cellIt = rowIn.cellIterator();
-					while (cellIt.hasNext()) {
-						Cell cellIn = cellIt.next();
-						Cell cellOut = rowOut.createCell(cellIn.getColumnIndex(), cellIn.getCellType());
-
-						switch (cellIn.getCellType()) {
-						case Cell.CELL_TYPE_BLANK: break;
-
-						case Cell.CELL_TYPE_BOOLEAN:
-							cellOut.setCellValue(cellIn.getBooleanCellValue());
-							break;
-
-						case Cell.CELL_TYPE_ERROR:
-							cellOut.setCellValue(cellIn.getErrorCellValue());
-							break;
-
-						case Cell.CELL_TYPE_FORMULA:
-							cellOut.setCellFormula(cellIn.getCellFormula());
-							break;
-
-						case Cell.CELL_TYPE_NUMERIC:
-							cellOut.setCellValue(cellIn.getNumericCellValue());
-							break;
-
-						case Cell.CELL_TYPE_STRING:
-							cellOut.setCellValue(cellIn.getStringCellValue());
-							break;
-						}
-
-						CellStyle styleIn = cellIn.getCellStyle();
-						CellStyle styleOut = cellOut.getCellStyle();
-						copyCellStyle(styleOut,styleIn,cellIn.getSheet().getWorkbook());
-						cellOut.setCellComment(cellIn.getCellComment());
-
-					}
-				}
-			}
-			OutputStream out = new BufferedOutputStream(new FileOutputStream(outF));
-			try {
-				wbOut.write(out);
-			} finally {
-				out.close();
-			}
-		} finally {
-			in.close();
-		}
-	}
-	*/
-
 	private static void transferData(Ephemeris eph, Row im, ExcelDataParser p) 
 			throws EphemerisDataMissingException, BadTransferException {
 
@@ -840,6 +661,10 @@ public class EphemerisParser {
 		// S-T-O
 		if (!transferSTO(p,eph,im.getCell(p.INDICES[ExcelDataParser.STO]))) {
 			System.out.print("S-T-O parse failed, attempting string...");
+		}
+		
+		if (!transferLunarCoords(p,eph,im)) {
+			System.out.print("Lunar Coords failed...");
 		}
 	}
 
@@ -1149,6 +974,82 @@ public class EphemerisParser {
 		} catch (EphemerisDataParseException e) {
 			target.setCellValue(eph.getSunTargetObserverStr());
 			return false;
+		}
+	}
+	
+	private static boolean transferLunarCoords(ExcelDataParser p, 
+			Ephemeris eph, Row im) throws 
+			EphemerisDataMissingException {
+		try {
+			String craterName;
+			double ewDist;
+			double nsDist;
+			String origin;
+			double fov;
+			
+			Cell cName = im.getCell(p.INDICES[ExcelDataParser.OFF_CRAT]);
+			Cell ew = im.getCell(p.INDICES[ExcelDataParser.OFF_EW_DIST]);
+			Cell ns = im.getCell(p.INDICES[ExcelDataParser.OFF_NS_DIST]);
+			Cell ori = im.getCell(p.INDICES[ExcelDataParser.OFF_ORIG]);
+			Cell f = im.getCell(p.INDICES[ExcelDataParser.FOV]);
+			
+			Cell targetLon = im.getCell(p.INDICES[ExcelDataParser.FOV_LON]);
+			Cell targetLat = im.getCell(p.INDICES[ExcelDataParser.FOV_LAT]);
+			Cell targetAlt = im.getCell(p.INDICES[ExcelDataParser.FOV_ALT]);
+			
+			if (cName.getCellType() == Cell.CELL_TYPE_STRING) {
+				craterName = cName.getStringCellValue();
+			} else {
+				throw new ExcelDataParserException("bad crater value");
+			}
+			
+			if (craterName.equals("Moon Center")) return true;
+			
+			if (ori.getCellType() == Cell.CELL_TYPE_STRING) {
+				origin = ori.getStringCellValue();
+			} else {
+				throw new ExcelDataParserException("bad origin value");
+			}
+			
+			if (origin.equals("term")) return true;
+			
+			if (ew.getCellType() == Cell.CELL_TYPE_NUMERIC) {
+				ewDist = ew.getNumericCellValue();
+			} else {
+				throw new ExcelDataParserException("bad e/w distance value");
+			}
+			
+			if (ns.getCellType() == Cell.CELL_TYPE_NUMERIC) {
+				nsDist = ns.getNumericCellValue();
+			} else {
+				throw new ExcelDataParserException("bad n/s distance value");
+			}
+			
+			if (f.getCellType() == Cell.CELL_TYPE_NUMERIC) {
+				fov = f.getNumericCellValue();
+			} else {
+				throw new ExcelDataParserException("bad fov value");
+			}
+			
+			Double[] coords = eph.getLunarCoords(craterName, 
+					ewDist, nsDist, origin, fov);
+			
+			targetLon.setCellValue(coords[0]);
+			formatCell(p,targetLon,1);
+			
+			targetLat.setCellValue(coords[1]);
+			formatCell(p,targetLat,1);
+			
+			targetAlt.setCellValue(coords[2]);
+			formatCell(p,targetAlt,1);
+			
+			return true;
+		} catch (EphemerisDataParseException e) {
+			System.out.print(e.getMessage() + "...");
+			throw new EphemerisDataMissingException();
+		} catch (ExcelDataParserException e) {
+			System.out.print(e.getMessage() + "...");
+			throw new EphemerisDataMissingException();
 		}
 	}
 	

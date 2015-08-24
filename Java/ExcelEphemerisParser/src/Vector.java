@@ -47,6 +47,14 @@ public class Vector {
 		elem[Z] = z;
 	}
 	
+	public double getElev() {
+		return Math.asin(elem[Z] / norm());
+	}
+	
+	public double getAzi() {
+		return Math.atan2(elem[Y],elem[X]);
+	}
+	
 	public double get(int i) {
 		return elem[i];
 	}
