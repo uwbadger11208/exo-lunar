@@ -78,6 +78,7 @@ public class LibrationEphemeris {
 		craters.put("Godin", new Double[]       { 10.2,  1.8});
 		craters.put("Vieta", new Double[]       {-56.3,-29.2}); // 303.7
 		craters.put("Furnerius", new Double[]   { 60.4,-36.3});
+		craters.put("Schickard", new Double[]   {-54.6,-44.4});
 		craters.put("Proclus", new Double[]     { 46.8, 16.1});
 		craters.put("Moon center", new Double[] {  0.0,  0.0});
 		
