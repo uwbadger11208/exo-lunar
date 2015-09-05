@@ -5,7 +5,7 @@ import java.util.HashMap;
 
 public class LibrationEphemeris {
 	
-	public static final double LUNAR_RADIUS = 1737.4; // in kilometers
+	public static final double LUNAR_RADIUS = 1737.53; // in kilometers
 	public static final double LENS_ANG_DIAM = 412.5; // in arcsec
 	private AxisEphemeris x;
 	private AxisEphemeris z;
