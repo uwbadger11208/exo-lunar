@@ -32,6 +32,8 @@ public class Ephemeris {
 			+ "CSV_FORMAT=%27NO%27&"
 			+ "STEP_SIZE=%271%20m%27";
 
+	private SolarSpectra spectra;
+
 	protected Scanner ephem; // to get lines from ephemeris
 	protected String[] current; // the current line of the ephemeris, split by spaces
 	protected boolean closed; // whether ephem has been closed
@@ -133,7 +135,7 @@ public class Ephemeris {
 					System.out.print(dateFormatter.format(period[j]) + " ");
 				System.out.println();
 			}
-			
+
 			if (i == dates.length - 1) {
 				endDate = dates[i];
 				Date[] period = new Date[2];
@@ -194,6 +196,7 @@ public class Ephemeris {
 		// get libration data
 		libra = new LibrationEphemeris(dates);
 
+		spectra = new SolarSpectra();
 	}
 
 	public Ephemeris(Date[] dates, String urlBase) throws IOException {
@@ -304,7 +307,7 @@ public class Ephemeris {
 		double d1 = geoCrater.getElev()*180/Math.PI;
 		return new Double[] {r1,d1};
 	}
-	
+
 	public Double[] getLunarCoords(String craterName, double ew_dist, double ns_dist, String origin, double fov) 
 			throws ExcelDataParserException, EphemerisDataMissingException, EphemerisDataParseException {
 		Double[] coords = getFovRaDec(craterName,ew_dist,ns_dist,origin,fov);
@@ -313,16 +316,16 @@ public class Ephemeris {
 
 	public Double[] getFovRaDec(String craterName, double ew_dist, double ns_dist, String origin, double fov) 
 			throws ExcelDataParserException, EphemerisDataMissingException, EphemerisDataParseException {
-		
+
 		String[] orig_info = origin.split(" ");
 		String orig_dist = orig_info[0];
 		String orig_dir = null;
 		if (orig_info.length == 2)
 			orig_dir = orig_info[1];
-		
+
 		if (orig_info.length > 2)
 			throw new ExcelDataParserException("Bad origin value");
-		
+
 		Double[] start;
 		switch (orig_dist) {
 		case "Crater":
@@ -341,10 +344,10 @@ public class Ephemeris {
 		default:
 			throw new ExcelDataParserException("Bad origin value");
 		}
-		
+
 		start[0] += ew_dist / 240; // E/W in secs of time
 		start[1] += ns_dist / 60; // N/S in arcmin
-		
+
 		return start;
 	}
 
@@ -360,7 +363,7 @@ public class Ephemeris {
 
 		if (craterCoords == null)
 			throw new ExcelDataParserException("Bad origin value");
-		
+
 		r1 = craterCoords[0];
 		d1 = craterCoords[1];
 
@@ -426,7 +429,7 @@ public class Ephemeris {
 			}
 			r1 = (start + end) / 2;
 			break;
-			
+
 		case "W":
 			start = r1;
 			end = r1;
@@ -443,7 +446,7 @@ public class Ephemeris {
 				resid = new Vector(d1 * Math.PI / 180,((start + end) / 2) * Math.PI / 180).dot(center) - dotProd;
 			}
 			r1 = (start + end) / 2;
-	
+
 			break;
 		default: throw new EphemerisDataParseException("invalid limb direction");
 		}
@@ -1050,6 +1053,28 @@ public class Ephemeris {
 			throw new EphemerisDataMissingException();
 		} catch (ArrayIndexOutOfBoundsException e) {
 			throw new EphemerisDataMissingException();
+		}
+	}
+
+	public double transferLineDepth(String filter, double wavelength) throws BadTransferException,
+	EphemerisDataMissingException, EphemerisDataParseException {
+		switch (filter) {
+		case "Na D2 5890/4 A": 
+			if (wavelength == 5889.9509)
+				return spectra.naLineDepth(this.getSolarRangeRate());
+
+			throw new BadTransferException("mismatched filter/wavelength."
+					+ "\nNa Filter should correspond to 5889.9509 A wavelength");
+
+		case "K D1 7699/5 A": 
+			if (wavelength == 7698.9647)
+				return spectra.kLineDepth(this.getSolarRangeRate());
+
+			throw new BadTransferException("mismatched filter/wavelength."
+					+ "\nK Filter should correspond to 7698.9647 A wavelength");
+
+		default: throw new BadTransferException("bad filter value."
+				+ "\nFilter should be Na D2 5890/4 A or K D1 7699/5 A");
 		}
 	}
 

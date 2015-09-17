@@ -666,6 +666,10 @@ public class EphemerisParser {
 		if (!transferLunarCoords(p,eph,im)) {
 			System.out.print("Lunar Coords failed...");
 		}
+		
+		if (!transferLineDepth(p,eph,im)) {
+			System.out.print("Lunar Coords failed...");
+		}
 	}
 
 	/**
@@ -1051,6 +1055,42 @@ public class EphemerisParser {
 			System.out.print(e.getMessage() + "...");
 			throw new EphemerisDataMissingException();
 		}
+	}
+	
+	private static boolean transferLineDepth(ExcelDataParser p, 
+			Ephemeris eph, Row im) throws BadTransferException {
+		Cell filtCell = im.getCell(p.INDICES[ExcelDataParser.FILTER]);
+		Cell waveCell = im.getCell(p.INDICES[ExcelDataParser.WAVELENGTH]);
+		Cell targetCell = im.getCell(p.INDICES[ExcelDataParser.LINE_DEPTH]);
+		
+		String filter;
+		double wavelength;
+		
+		if (filtCell != null) {
+			filter = filtCell.getStringCellValue();
+		} else {
+			throw new BadTransferException("bad filter cell value");
+		}
+		
+		if (waveCell != null && waveCell.getCellType() == Cell.CELL_TYPE_NUMERIC) {
+			wavelength = waveCell.getNumericCellValue();
+		} else {
+			throw new BadTransferException("bad wavelength cell value");
+		}
+		
+		double lineDepth;
+		try {
+			lineDepth = eph.transferLineDepth(filter, wavelength);
+		} catch (EphemerisDataParseException e) {
+			return false;
+		} catch (EphemerisDataMissingException e) {
+			return false;
+		}
+		
+		targetCell.setCellValue(lineDepth);
+		formatCell(p,targetCell,4);
+		
+		return true;
 	}
 	
 	private static int getTimeInt(String timeStr) {

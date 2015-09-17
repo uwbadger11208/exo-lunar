@@ -50,7 +50,9 @@ public class ExcelDataParser {
 	public static final int FOV_LAT = 31;
 	public static final int FOV_ALT = 32;
 	public static final int FOV = 33;
-	public static final int N_PARAMS = 34;
+	public static final int FILTER = 34;
+	public static final int WAVELENGTH = 35;
+	public static final int N_PARAMS = 36;
 
 	public static final int BLANK = -1;
 	
@@ -175,6 +177,10 @@ public class ExcelDataParser {
 				message += "FOV Altitude\n";
 			if (INDICES[FOV] == -1)
 				message += "FOV\n";
+			if (INDICES[FILTER] == -1)
+				message += "Filter\n";
+			if (INDICES[WAVELENGTH] == -1)
+				message += "Wavelength\n";
 
 			throw new ExcelDataParserException(message);
 		}
@@ -415,6 +421,12 @@ public class ExcelDataParser {
 				
 			} else if (header.equals("Altitude(km)")) {
 				return FOV_ALT;
+			
+			} else if (header.equals("Filter")) {
+				return FILTER;
+				
+			} else if (header.equals("Wavelength")) {
+				return WAVELENGTH;
 
 				// everything else
 			} else {
