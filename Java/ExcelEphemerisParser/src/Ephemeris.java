@@ -296,8 +296,12 @@ public class Ephemeris {
 
 	}
 
-	public Double[] getGeocentricCrater(String craterName) throws EphemerisDataMissingException, EphemerisDataParseException {
+	public Double[] getGeocentricCrater(String craterName) throws 
+	EphemerisDataMissingException, EphemerisDataParseException,
+	BadTransferException {
 		Double[] craterCoords = libra.getCraterCoords().get(craterName);
+			if (craterCoords == null)
+				throw new BadTransferException("bad crater name");
 		Vector moonCenter = new Vector(getDeclination()*Math.PI/180,getRightAcension()*Math.PI/180).scale(getTargetRange());
 		Vector selenoCrater = new Vector(craterCoords[1]*Math.PI/180,craterCoords[0]*Math.PI/180).scale(
 				LibrationEphemeris.LUNAR_RADIUS);
@@ -309,13 +313,13 @@ public class Ephemeris {
 	}
 
 	public Double[] getLunarCoords(String craterName, double ew_dist, double ns_dist, String origin, double fov) 
-			throws ExcelDataParserException, EphemerisDataMissingException, EphemerisDataParseException {
+			throws BadTransferException, EphemerisDataMissingException, EphemerisDataParseException {
 		Double[] coords = getFovRaDec(craterName,ew_dist,ns_dist,origin,fov);
 		return getLunarCoords(coords[0],coords[1]);
 	}
 
 	public Double[] getFovRaDec(String craterName, double ew_dist, double ns_dist, String origin, double fov) 
-			throws ExcelDataParserException, EphemerisDataMissingException, EphemerisDataParseException {
+			throws BadTransferException, EphemerisDataMissingException, EphemerisDataParseException {
 
 		String[] orig_info = origin.split(" ");
 		String orig_dist = orig_info[0];
@@ -324,25 +328,25 @@ public class Ephemeris {
 			orig_dir = orig_info[1];
 
 		if (orig_info.length > 2)
-			throw new ExcelDataParserException("Bad origin value");
+			throw new BadTransferException("bad origin value");
 
 		Double[] start;
 		switch (orig_dist) {
 		case "Crater":
 			start = getGeocentricCrater(craterName); 
 			if (start == null)
-				throw new ExcelDataParserException("Bad origin value");
+				throw new BadTransferException("bad crater value");
 			break;
 		case "Limb":
 			if (orig_dir == null)
-				throw new ExcelDataParserException("Bad origin value");
+				throw new BadTransferException("bad origin value");
 			start = getLimbRaDec(craterName,orig_dir,fov); break;
 		case "Edge":
 			if (orig_dir == null)
-				throw new ExcelDataParserException("Bad origin value");
+				throw new BadTransferException("bad origin value");
 			start = getLimbRaDec(craterName,orig_dir,LibrationEphemeris.LENS_ANG_DIAM); break;
 		default:
-			throw new ExcelDataParserException("Bad origin value");
+			throw new BadTransferException("bad origin value");
 		}
 
 		start[0] += ew_dist / 240; // E/W in secs of time
@@ -352,7 +356,8 @@ public class Ephemeris {
 	}
 
 	public Double[] getLimbRaDec(String craterName, String direction, double fov) 
-			throws EphemerisDataParseException, EphemerisDataMissingException, ExcelDataParserException {
+			throws EphemerisDataParseException, EphemerisDataMissingException, 
+			BadTransferException {
 
 		double d1,r1,d0,r0;
 		r0 = getRightAcension();
@@ -362,7 +367,7 @@ public class Ephemeris {
 		Double[] craterCoords = getGeocentricCrater(craterName);
 
 		if (craterCoords == null)
-			throw new ExcelDataParserException("Bad origin value");
+			throw new BadTransferException("bad crater value");
 
 		r1 = craterCoords[0];
 		d1 = craterCoords[1];

@@ -136,7 +136,7 @@ public class EphemerisParser {
 				}
 				in = new FileInputStream(xlsx2xlsName(excelFile));
 				log = new HSSFWorkbook(in);
-				*/
+				 */
 				in = new FileInputStream(excelFile);
 				log = new XSSFWorkbook(in);
 				in.close();
@@ -145,7 +145,7 @@ public class EphemerisParser {
 			}
 			System.out.println("done");
 
-			
+
 
 			// get ephemeris if NOT here
 			if (!ephProvided) {
@@ -158,12 +158,12 @@ public class EphemerisParser {
 					dates = new Date[log.getNumberOfSheets()];
 					for (int i = 0; i < dates.length; i++)
 						dates[i] = dateFormatter.parse(log.getSheetName(i));
-					 //*/
+					//*/
 					/*
 					start = dateFormatter.parse(log.getSheetName(0));
 					end = dateFormatter.parse(log.getSheetName(log.getNumberOfSheets()-1));
 					end = new Date(end.getTime() + 24*60*Ephemeris.MIL_PER_MIN);
-					*/
+					 */
 				} catch (ParseException e) {
 					throw new WebEphemerisException("unable to parse start and end"
 							+ " dates from spreadsheet");
@@ -387,12 +387,12 @@ public class EphemerisParser {
 										throw new BadTransferException("Time must be entered in excel using time or"
 												+ " string format. Correct and try again");
 									}
-									
+
 									imTimeInt = getTimeInt(timeStr);
 
 									if (imTimeInt > timeInt) {
 										transferData(ephem,image,parse);
-										
+
 										timeInt = imTimeInt;
 										lastTimeStr = timeStr;
 										System.out.println("done");
@@ -435,7 +435,7 @@ public class EphemerisParser {
 					}
 				}
 			}
-			
+
 			for (int ii = 0; ii < parse.INDICES.length; ii++) {
 				night.autoSizeColumn(parse.INDICES[ii]);
 			}
@@ -444,7 +444,7 @@ public class EphemerisParser {
 
 		try {
 			System.out.print("writing edited excel file...");
-			
+
 			OutputStream out = new FileOutputStream(excelFile);
 			log.write(out);
 			out.flush();
@@ -492,7 +492,7 @@ public class EphemerisParser {
 			}
 		}
 	}
-	
+
 	private static void transferData(Ephemeris eph, Row im, ExcelDataParser p) 
 			throws EphemerisDataMissingException, BadTransferException {
 
@@ -662,11 +662,11 @@ public class EphemerisParser {
 		if (!transferSTO(p,eph,im.getCell(p.INDICES[ExcelDataParser.STO]))) {
 			System.out.print("S-T-O parse failed, attempting string...");
 		}
-		
+
 		if (!transferLunarCoords(p,eph,im)) {
 			System.out.print("Lunar Coords failed...");
 		}
-		
+
 		if (!transferLineDepth(p,eph,im)) {
 			System.out.print("Lunar Coords failed...");
 		}
@@ -980,104 +980,101 @@ public class EphemerisParser {
 			return false;
 		}
 	}
-	
+
 	private static boolean transferLunarCoords(ExcelDataParser p, 
 			Ephemeris eph, Row im) throws 
-			EphemerisDataMissingException {
-		try {
-			String craterName;
-			double ewDist;
-			double nsDist;
-			String origin;
-			double fov;
-			
-			Cell cName = im.getCell(p.INDICES[ExcelDataParser.OFF_CRAT]);
-			Cell ew = im.getCell(p.INDICES[ExcelDataParser.OFF_EW_DIST]);
-			Cell ns = im.getCell(p.INDICES[ExcelDataParser.OFF_NS_DIST]);
-			Cell ori = im.getCell(p.INDICES[ExcelDataParser.OFF_ORIG]);
-			Cell f = im.getCell(p.INDICES[ExcelDataParser.FOV]);
-			
-			Cell targetLon = im.getCell(p.INDICES[ExcelDataParser.FOV_LON]);
-			Cell targetLat = im.getCell(p.INDICES[ExcelDataParser.FOV_LAT]);
-			Cell targetAlt = im.getCell(p.INDICES[ExcelDataParser.FOV_ALT]);
-			
-			if (cName.getCellType() == Cell.CELL_TYPE_STRING) {
-				craterName = cName.getStringCellValue();
-			} else {
-				throw new ExcelDataParserException("bad crater value");
-			}
-			
-			if (craterName.equals("Moon Center")) return true;
-			
-			if (ori.getCellType() == Cell.CELL_TYPE_STRING) {
-				origin = ori.getStringCellValue();
-			} else {
-				throw new ExcelDataParserException("bad origin value");
-			}
-			
-			if (origin.equals("term")) return true;
-			
-			if (ew.getCellType() == Cell.CELL_TYPE_NUMERIC) {
-				ewDist = ew.getNumericCellValue();
-			} else {
-				throw new ExcelDataParserException("bad e/w distance value");
-			}
-			
-			if (ns.getCellType() == Cell.CELL_TYPE_NUMERIC) {
-				nsDist = ns.getNumericCellValue();
-			} else {
-				throw new ExcelDataParserException("bad n/s distance value");
-			}
-			
-			if (f.getCellType() == Cell.CELL_TYPE_NUMERIC) {
-				fov = f.getNumericCellValue();
-			} else {
-				throw new ExcelDataParserException("bad fov value");
-			}
-			
-			Double[] coords = eph.getLunarCoords(craterName, 
-					ewDist, nsDist, origin, fov);
-			
-			targetLon.setCellValue(coords[0]);
-			formatCell(p,targetLon,1);
-			
-			targetLat.setCellValue(coords[1]);
-			formatCell(p,targetLat,1);
-			
-			targetAlt.setCellValue(coords[2]);
-			formatCell(p,targetAlt,1);
-			
-			return true;
-		} catch (EphemerisDataParseException e) {
-			System.out.print(e.getMessage() + "...");
-			throw new EphemerisDataMissingException();
-		} catch (ExcelDataParserException e) {
-			System.out.print(e.getMessage() + "...");
-			throw new EphemerisDataMissingException();
+			EphemerisDataMissingException, BadTransferException {
+		String craterName;
+		double ewDist;
+		double nsDist;
+		String origin;
+		double fov;
+
+		Cell cName = im.getCell(p.INDICES[ExcelDataParser.OFF_CRAT]);
+		Cell ew = im.getCell(p.INDICES[ExcelDataParser.OFF_EW_DIST]);
+		Cell ns = im.getCell(p.INDICES[ExcelDataParser.OFF_NS_DIST]);
+		Cell ori = im.getCell(p.INDICES[ExcelDataParser.OFF_ORIG]);
+		Cell f = im.getCell(p.INDICES[ExcelDataParser.FOV]);
+
+		Cell targetLon = im.getCell(p.INDICES[ExcelDataParser.FOV_LON]);
+		Cell targetLat = im.getCell(p.INDICES[ExcelDataParser.FOV_LAT]);
+		Cell targetAlt = im.getCell(p.INDICES[ExcelDataParser.FOV_ALT]);
+
+		if (cName.getCellType() == Cell.CELL_TYPE_STRING) {
+			craterName = cName.getStringCellValue();
+		} else {
+			throw new BadTransferException("bad crater value");
 		}
+
+		if (craterName.equals("Moon Center")) return true;
+
+		if (ori.getCellType() == Cell.CELL_TYPE_STRING) {
+			origin = ori.getStringCellValue();
+		} else {
+			throw new BadTransferException("bad origin value");
+		}
+
+		if (origin.equals("term")) return true;
+
+		if (ew.getCellType() == Cell.CELL_TYPE_NUMERIC) {
+			ewDist = ew.getNumericCellValue();
+		} else {
+			throw new BadTransferException("bad e/w distance value");
+		}
+
+		if (ns.getCellType() == Cell.CELL_TYPE_NUMERIC) {
+			nsDist = ns.getNumericCellValue();
+		} else {
+			throw new BadTransferException("bad n/s distance value");
+		}
+
+		if (f.getCellType() == Cell.CELL_TYPE_NUMERIC) {
+			fov = f.getNumericCellValue();
+		} else {
+			throw new BadTransferException("bad fov value");
+		}
+
+		Double[] coords;
+		try {
+			coords = eph.getLunarCoords(craterName,ewDist, nsDist, origin, fov);
+		} catch (EphemerisDataParseException e) {
+			throw new BadTransferException(e.getMessage());
+		}
+				
+
+		targetLon.setCellValue(coords[0]);
+		formatCell(p,targetLon,1);
+
+		targetLat.setCellValue(coords[1]);
+		formatCell(p,targetLat,1);
+
+		targetAlt.setCellValue(coords[2]);
+		formatCell(p,targetAlt,1);
+
+		return true;
 	}
-	
+
 	private static boolean transferLineDepth(ExcelDataParser p, 
 			Ephemeris eph, Row im) throws BadTransferException {
 		Cell filtCell = im.getCell(p.INDICES[ExcelDataParser.FILTER]);
 		Cell waveCell = im.getCell(p.INDICES[ExcelDataParser.WAVELENGTH]);
 		Cell targetCell = im.getCell(p.INDICES[ExcelDataParser.LINE_DEPTH]);
-		
+
 		String filter;
 		double wavelength;
-		
+
 		if (filtCell != null) {
 			filter = filtCell.getStringCellValue();
 		} else {
 			throw new BadTransferException("bad filter cell value");
 		}
-		
+
 		if (waveCell != null && waveCell.getCellType() == Cell.CELL_TYPE_NUMERIC) {
 			wavelength = waveCell.getNumericCellValue();
 		} else {
 			throw new BadTransferException("bad wavelength cell value");
 		}
-		
+
 		double lineDepth;
 		try {
 			lineDepth = eph.transferLineDepth(filter, wavelength);
@@ -1086,23 +1083,23 @@ public class EphemerisParser {
 		} catch (EphemerisDataMissingException e) {
 			return false;
 		}
-		
+
 		targetCell.setCellValue(lineDepth);
 		formatCell(p,targetCell,4);
-		
+
 		return true;
 	}
-	
+
 	private static int getTimeInt(String timeStr) {
 		int colonInd = timeStr.indexOf(':');
 		return Integer.parseInt(timeStr.substring(0,colonInd) + 
 				timeStr.substring(colonInd+1));
 	}
-	
+
 	public static Date addDay(Date d) {
 		return new Date(d.getTime() + 24*60*Ephemeris.MIL_PER_MIN);
 	}
-	
+
 	/*
 	private static void copyCellStyle(CellStyle s1, CellStyle s2, Workbook w) {
 		s1.setAlignment(s2.getAlignment());
@@ -1127,5 +1124,5 @@ public class EphemerisParser {
 		s1.setVerticalAlignment(s2.getVerticalAlignment());
 		s1.setWrapText(s2.getWrapText());
 	}
-	*/
+	 */
 }
