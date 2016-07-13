@@ -341,6 +341,10 @@ public class Ephemeris {
 			if (orig_dir == null)
 				throw new BadTransferException("bad origin value");
 			start = getLimbRaDec(craterName,orig_dir,fov); break;
+		case "Aper":
+			if (orig_dir == null)
+				throw new BadTransferException("bad origin value");
+			start = getLimbRaDec(craterName,orig_dir,LibrationEphemeris.APER_DIAM); break;
 		case "Edge":
 			if (orig_dir == null)
 				throw new BadTransferException("bad origin value");
