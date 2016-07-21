@@ -30,8 +30,8 @@ public class EphemerisParser {
 	// format of sheet date names
 	public static final String SHEET_NAME_FORMAT = "yyMMMdd";
 	public static final String SHEET_TIME_FORMAT = "HH:mm";
-	public static final String FILES_TO_TRANSFER = "moon";
-	public static final int FNAME_LENGTH = FILES_TO_TRANSFER.length();
+	public static final String FILES_TO_TRANSFER_MOON = "moon";
+	public static final int FNAME_LENGTH_MOON = FILES_TO_TRANSFER_MOON.length();
 
 	public static final String XLS = ".xls";
 	public static final int XLS_LEN = XLS.length();
@@ -361,9 +361,9 @@ public class EphemerisParser {
 						String name = filecell.getStringCellValue();
 
 						// check if it's the filetype being transfered
-						if (name.length() > FNAME_LENGTH) {
-							if (name.substring(0,FNAME_LENGTH).equals(
-									FILES_TO_TRANSFER)) {
+						if (name.length() > FNAME_LENGTH_MOON) {
+							if (name.substring(0,FNAME_LENGTH_MOON).equals(
+									FILES_TO_TRANSFER_MOON)) {
 
 								// if it is, try the transfer
 								try {
@@ -517,7 +517,7 @@ public class EphemerisParser {
 			throw new BadTransferException("Time must be entered in excel using time or"
 					+ " string format. Correct and try again");
 		}
-
+		
 		// find exposure time
 		int expTime = 0;
 		Cell expCell = im.getCell(p.INDICES[ExcelDataParser.EXP_TIME]);
@@ -662,6 +662,7 @@ public class EphemerisParser {
 		if (!transferSTO(p,eph,im.getCell(p.INDICES[ExcelDataParser.STO]))) {
 			System.out.print("S-T-O parse failed, attempting string...");
 		}
+
 
 		if (!transferLunarCoords(p,eph,im)) {
 			System.out.print("Lunar Coords failed...");
