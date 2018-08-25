@@ -18,7 +18,7 @@ import static java.lang.Math.pow;
  */
 public class Ephemeris {
 
-	public static final String JPL_URL = "http://ssd.jpl.nasa.gov/"
+	public static final String JPL_URL = "https://ssd.jpl.nasa.gov/"
 			+ "horizons_batch.cgi?batch=1&"
 			+ "COMMAND=%27301%27&"
 			+ "CENTER=%27695@399%27&"

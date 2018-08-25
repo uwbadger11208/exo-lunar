@@ -5,7 +5,7 @@ import java.util.Date;
 
 public class AxisEphemeris extends Ephemeris {
 	
-	public static final String X = "http://ssd.jpl.nasa.gov/"
+	public static final String X = "https://ssd.jpl.nasa.gov/"
 			+ "horizons_batch.cgi?batch=1&"
 			+ "COMMAND=%27g:0,0,0@301%27&"
 			+ "CENTER=%27695@399%27&"
@@ -19,7 +19,7 @@ public class AxisEphemeris extends Ephemeris {
 			+ "CSV_FORMAT=%27NO%27&"
 			+ "STEP_SIZE=%271%20m%27";
 	
-	public static final String Z = "http://ssd.jpl.nasa.gov/"
+	public static final String Z = "https://ssd.jpl.nasa.gov/"
 			+ "horizons_batch.cgi?batch=1&"
 			+ "COMMAND=%27g:0,90,0@301%27&"
 			+ "CENTER=%27695@399%27&"
