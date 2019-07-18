@@ -148,7 +148,7 @@ public class ExcelDataParser {
 
 	/** Depth of Fraunhofer line */
 	public static final int LINE_DEPTH = 29;
-	public static final String LINE_DEPTH_S = "LineDepth";
+	public static final String LINE_DEPTH_S = "Line_Depth";
 
 	/** Lunar longtiude */
 	public static final int FOV_LON = 30;
