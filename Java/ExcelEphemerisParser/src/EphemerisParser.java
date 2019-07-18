@@ -12,6 +12,7 @@ import java.util.Date;
 
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -28,7 +29,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 public class EphemerisParser {
 
 	// format of sheet date names
-	public static final String SHEET_NAME_FORMAT = "yyMMMdd";
+	public static final String SHEET_NAME_FORMAT = "yyyy_MM_dd";
 	public static final String SHEET_TIME_FORMAT = "HH:mm";
 	public static final String FILES_TO_TRANSFER_MOON = "moon";
 	public static final int FNAME_LENGTH_MOON = FILES_TO_TRANSFER_MOON.length();
@@ -156,8 +157,15 @@ public class EphemerisParser {
 				try {
 					//*
 					dates = new Date[log.getNumberOfSheets()];
-					for (int i = 0; i < dates.length; i++)
+
+					System.out.println("a");
+
+					for (int i = 0; i < dates.length; i++) {
+						System.out.println(i);
+						System.out.println(log.getSheetName(i));
 						dates[i] = dateFormatter.parse(log.getSheetName(i));
+					}
+
 					//*/
 					/*
 					start = dateFormatter.parse(log.getSheetName(0));
@@ -357,7 +365,7 @@ public class EphemerisParser {
 				if (filecell != null) {
 
 					// if not null, get contents
-					if (filecell.getCellType() == Cell.CELL_TYPE_STRING) {
+					if (filecell.getCellType() == CellType.STRING) {
 						String name = filecell.getStringCellValue();
 
 						// check if it's the filetype being transfered
@@ -379,9 +387,9 @@ public class EphemerisParser {
 									}
 
 									// try to get time
-									if (timeCell.getCellType() == Cell.CELL_TYPE_NUMERIC) {
+									if (timeCell.getCellType() == CellType.NUMERIC) {
 										timeStr = timeFormatter.format(timeCell.getDateCellValue());
-									} else if (timeCell.getCellType() == Cell.CELL_TYPE_STRING) {
+									} else if (timeCell.getCellType() == CellType.STRING) {
 										timeStr = timeCell.getStringCellValue();
 									} else {
 										throw new BadTransferException("Time must be entered in excel using time or"
@@ -509,9 +517,9 @@ public class EphemerisParser {
 		}
 
 		// try to get time
-		if (timeCell.getCellType() == Cell.CELL_TYPE_NUMERIC) {
+		if (timeCell.getCellType() == CellType.NUMERIC) {
 			timeStarted = time.format(timeCell.getDateCellValue());
-		} else if (timeCell.getCellType() == Cell.CELL_TYPE_STRING) {
+		} else if (timeCell.getCellType() == CellType.STRING) {
 			timeStarted = timeCell.getStringCellValue();
 		} else {
 			throw new BadTransferException("Time must be entered in excel using time or"
@@ -528,9 +536,9 @@ public class EphemerisParser {
 		}
 
 		// try to get time
-		if (expCell.getCellType() == Cell.CELL_TYPE_NUMERIC) {
+		if (expCell.getCellType() == CellType.NUMERIC) {
 			expTime = (int) expCell.getNumericCellValue();
-		} else if (expCell.getCellType() == Cell.CELL_TYPE_STRING) {
+		} else if (expCell.getCellType() == CellType.STRING) {
 			try {
 				expTime = Integer.parseInt(expCell.getStringCellValue());
 			} catch (NumberFormatException e) {
@@ -1001,7 +1009,7 @@ public class EphemerisParser {
 		Cell targetLat = im.getCell(p.INDICES[ExcelDataParser.FOV_LAT]);
 		Cell targetAlt = im.getCell(p.INDICES[ExcelDataParser.FOV_ALT]);
 
-		if (cName.getCellType() == Cell.CELL_TYPE_STRING) {
+		if (cName.getCellType() == CellType.STRING) {
 			craterName = cName.getStringCellValue();
 		} else {
 			throw new BadTransferException("bad crater value");
@@ -1009,7 +1017,7 @@ public class EphemerisParser {
 
 		if (craterName.equals("Moon Center")) return true;
 
-		if (ori.getCellType() == Cell.CELL_TYPE_STRING) {
+		if (ori.getCellType() == CellType.STRING) {
 			origin = ori.getStringCellValue();
 		} else {
 			throw new BadTransferException("bad origin value");
@@ -1017,19 +1025,19 @@ public class EphemerisParser {
 
 		if (origin.equals("term")) return true;
 
-		if (ew.getCellType() == Cell.CELL_TYPE_NUMERIC) {
+		if (ew.getCellType() == CellType.NUMERIC) {
 			ewDist = ew.getNumericCellValue();
 		} else {
 			throw new BadTransferException("bad e/w distance value");
 		}
 
-		if (ns.getCellType() == Cell.CELL_TYPE_NUMERIC) {
+		if (ns.getCellType() == CellType.NUMERIC) {
 			nsDist = ns.getNumericCellValue();
 		} else {
 			throw new BadTransferException("bad n/s distance value");
 		}
 
-		if (f.getCellType() == Cell.CELL_TYPE_NUMERIC) {
+		if (f.getCellType() == CellType.NUMERIC) {
 			fov = f.getNumericCellValue();
 		} else {
 			throw new BadTransferException("bad fov value");
@@ -1070,7 +1078,7 @@ public class EphemerisParser {
 			throw new BadTransferException("bad filter cell value");
 		}
 
-		if (waveCell != null && waveCell.getCellType() == Cell.CELL_TYPE_NUMERIC) {
+		if (waveCell != null && waveCell.getCellType() == CellType.NUMERIC) {
 			wavelength = waveCell.getNumericCellValue();
 		} else {
 			throw new BadTransferException("bad wavelength cell value");
