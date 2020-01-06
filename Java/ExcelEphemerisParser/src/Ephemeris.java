@@ -332,20 +332,20 @@ public class Ephemeris {
 
 		Double[] start;
 		switch (orig_dist) {
-		case "Crater":
+		case "crater":
 			start = getGeocentricCrater(craterName); 
 			if (start == null)
 				throw new BadTransferException("bad crater value");
 			break;
-		case "Limb":
+		case "limb":
 			if (orig_dir == null)
 				throw new BadTransferException("bad origin value");
 			start = getLimbRaDec(craterName,orig_dir,fov); break;
-		case "Aper":
+		case "aper":
 			if (orig_dir == null)
 				throw new BadTransferException("bad origin value");
 			start = getLimbRaDec(craterName,orig_dir,LibrationEphemeris.APER_DIAM); break;
-		case "Edge":
+		case "edge":
 			if (orig_dir == null)
 				throw new BadTransferException("bad origin value");
 			start = getLimbRaDec(craterName,orig_dir,LibrationEphemeris.LENS_ANG_DIAM); break;
@@ -385,7 +385,7 @@ public class Ephemeris {
 		double start,end,resid;
 		resid = new Vector(d1 * Math.PI / 180,r1 * Math.PI / 180).dot(center) - dotProd;
 		switch (dirs[0]) {
-		case "N":
+		case "n":
 			start = d1;
 			end = d1;
 			while (new Vector(end * Math.PI / 180, r1 * Math.PI / 180).dot(center) - dotProd > 0)
@@ -403,7 +403,7 @@ public class Ephemeris {
 			d1 = (start + end) / 2;
 
 			break;
-		case "S":
+		case "s":
 			start = d1;
 			end = d1;
 			while (new Vector(end * Math.PI / 180, r1 * Math.PI / 180).dot(center) - dotProd > 0)
@@ -421,7 +421,7 @@ public class Ephemeris {
 			d1 = (start + end) / 2;
 
 			break;
-		case "E":
+		case "e":
 			start = r1;
 			end = r1;
 			while (new Vector(d1 * Math.PI / 180, end * Math.PI / 180).dot(center) - dotProd > 0)
@@ -439,7 +439,7 @@ public class Ephemeris {
 			r1 = (start + end) / 2;
 			break;
 
-		case "W":
+		case "w":
 			start = r1;
 			end = r1;
 			while (new Vector(d1 * Math.PI / 180, end * Math.PI / 180).dot(center) - dotProd > 0)

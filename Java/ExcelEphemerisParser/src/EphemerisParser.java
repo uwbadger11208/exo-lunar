@@ -1010,20 +1010,20 @@ public class EphemerisParser {
 		Cell targetAlt = im.getCell(p.INDICES[ExcelDataParser.FOV_ALT]);
 
 		if (cName.getCellType() == CellType.STRING) {
-			craterName = cName.getStringCellValue();
+			craterName = cName.getStringCellValue().toLowerCase();
 		} else {
 			throw new BadTransferException("bad crater value");
 		}
 
-		if (craterName.equals("Moon Center")) return true;
+		if (craterName.equals("moon center")) return true;
 
 		if (ori.getCellType() == CellType.STRING) {
-			origin = ori.getStringCellValue();
+			origin = ori.getStringCellValue().toLowerCase();
 		} else {
 			throw new BadTransferException("bad origin value");
 		}
 
-		if (origin.equals("term")) return true;
+		if (origin.toLowerCase().equals("term")) return true;
 
 		if (ew.getCellType() == CellType.NUMERIC) {
 			ewDist = ew.getNumericCellValue();

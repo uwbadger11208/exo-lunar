@@ -58,35 +58,35 @@ public class LibrationEphemeris {
 	private static HashMap<String,Double[]> getCraterMap() {
 		HashMap<String,Double[]> craters = new HashMap<String,Double[]>();
 		//          crater name                 long (e+), lat (n+) 
-		craters.put("Langrenus", new Double[]   	{ 60.9, -8.9});
-		craters.put("Cleomedes", new Double[]   	{ 55.5, 27.7});
-		craters.put("Petavius", new Double[]    	{ 60.4,-25.3});
-		craters.put("Grimaldi", new Double[]    	{-68.8, -5.2}); // 291.2
-		craters.put("Aristarchus", new Double[] 	{-47.4, 23.7}); // 312.6
-		craters.put("Tycho", new Double[]       	{-11.4,-43.3}); // 348.6
-		craters.put("Plato", new Double[]       	{ -9.3, 51.6}); // 350.7
-		craters.put("Apollonius", new Double[]  	{ 61.1,  4.5});
-		craters.put("Endymion", new Double[]    	{ 56.5, 53.6});
-		craters.put("Messala", new Double[]     	{ 59.9, 39.2});
-		craters.put("Atlas", new Double[]       	{ 44.4, 46.7});
-		craters.put("Janssen", new Double[]     	{ 40.8,-45.0});
-		craters.put("Ptolemaeus", new Double[]  	{ -1.8, -9.2}); // 358.2
-		craters.put("Kepler", new Double[]      	{-38.0,  8.1}); // 322.0
-		craters.put("Copernicus", new Double[]  	{-20.1,  9.6}); // 339.9
-		craters.put("Gassendi", new Double[]    	{-40.0,-17.6}); // 320.0
-		craters.put("Mare Iridum", new Double[] 	{-31.5, 44.1}); // 328.5
-		craters.put("Theophilus", new Double[]  	{ 26.4,-11.4});
-		craters.put("Godin", new Double[]       	{ 10.2,  1.8});
-		craters.put("Vieta", new Double[]       	{-56.3,-29.2}); // 303.7
-		craters.put("Furnerius", new Double[]   	{ 60.4,-36.3});
-		craters.put("Schickard", new Double[]   	{-54.6,-44.4});
-		craters.put("Proclus", new Double[]     	{ 46.8, 16.1});
-		craters.put("Stevinus", new Double[]		{ 54.2,-32.5});
-		craters.put("Aristoteles", new Double[] 	{ 17.4, 50.2});
-		craters.put("Mons Gruithuisen", new Double[]{-40.5, 36.6}); 
-		craters.put("Scheiner", new Double[]		{-27.8,-60.5});
-		craters.put("Moon center", new Double[] 	{  0.0,  0.0});
-		craters.put("Mons Rumker", new Double[]     {-58.1, 40.8});
+		craters.put("langrenus", new Double[]   	{ 60.9, -8.9});
+		craters.put("cleomedes", new Double[]   	{ 55.5, 27.7});
+		craters.put("petavius", new Double[]    	{ 60.4,-25.3});
+		craters.put("grimaldi", new Double[]    	{-68.8, -5.2}); // 291.2
+		craters.put("aristarchus", new Double[] 	{-47.4, 23.7}); // 312.6
+		craters.put("tycho", new Double[]       	{-11.4,-43.3}); // 348.6
+		craters.put("plato", new Double[]       	{ -9.3, 51.6}); // 350.7
+		craters.put("apollonius", new Double[]  	{ 61.1,  4.5});
+		craters.put("endymion", new Double[]    	{ 56.5, 53.6});
+		craters.put("messala", new Double[]     	{ 59.9, 39.2});
+		craters.put("atlas", new Double[]       	{ 44.4, 46.7});
+		craters.put("janssen", new Double[]     	{ 40.8,-45.0});
+		craters.put("ptolemaeus", new Double[]  	{ -1.8, -9.2}); // 358.2
+		craters.put("kepler", new Double[]      	{-38.0,  8.1}); // 322.0
+		craters.put("copernicus", new Double[]  	{-20.1,  9.6}); // 339.9
+		craters.put("gassendi", new Double[]    	{-40.0,-17.6}); // 320.0
+		craters.put("mare iridum", new Double[] 	{-31.5, 44.1}); // 328.5
+		craters.put("theophilus", new Double[]  	{ 26.4,-11.4});
+		craters.put("godin", new Double[]       	{ 10.2,  1.8});
+		craters.put("vieta", new Double[]       	{-56.3,-29.2}); // 303.7
+		craters.put("furnerius", new Double[]   	{ 60.4,-36.3});
+		craters.put("schickard", new Double[]   	{-54.6,-44.4});
+		craters.put("proclus", new Double[]     	{ 46.8, 16.1});
+		craters.put("stevinus", new Double[]		{ 54.2,-32.5});
+		craters.put("aristoteles", new Double[] 	{ 17.4, 50.2});
+		craters.put("mons Gruithuisen", new Double[]{-40.5, 36.6}); 
+		craters.put("scheiner", new Double[]		{-27.8,-60.5});
+		craters.put("moon center", new Double[] 	{  0.0,  0.0});
+		craters.put("mons rumker", new Double[]     {-58.1, 40.8});
 		
 		return craters;
 	}
