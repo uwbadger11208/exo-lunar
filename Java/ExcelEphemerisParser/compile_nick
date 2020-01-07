@@ -1,0 +1,68 @@
+#!/bin/bash
+
+# name of main class
+MAIN=EphemerisParser
+# name of executable JAR file
+EXEC=ephparse.jar
+
+# source, class, library and (global) root directories
+SRCDIR=src
+BINDIR=bin
+LIBDIR=libs
+COMPILE_ROOT=$(pwd)
+
+# color separated list of linked libraries
+LIBS=$(find $LIBDIR -path '*jar' | tr '\n' ':')
+
+# path to main class source file
+MAINSRC=$SRCDIR/$MAIN.java
+
+# manifest filename
+MANIFEST=Manifest.txt
+
+# jar commands for extraction/compression
+jarX="jar -xf"
+jarC="jar -cfm"
+
+# java compilation command
+jc=javac
+
+# java flags for libraries, source locations and output directory
+lflags="-cp $LIBS:$BINDIR:."
+sflags="-sourcepath $SRCDIR"
+dflags="-d $BINDIR"
+
+# make directory for compiled classes
+echo "Creating build directory ./$BINDIR"
+mkdir -p $BINDIR
+
+# build code from source
+echo "Compiling source code from ./$SRCDIR to ./$BINDIR"
+$jc -target 8 -source 8 -bootclasspath /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/rt.jar $lflags $sflags $dflags $MAINSRC
+
+# head into build directory to unpack linked jars
+echo "Entering ./$BINDIR"
+cd $BINDIR
+
+# go through each library
+for lib in ${LIBS//:/ }
+do 
+	# for each one, completely unpack class structure
+	# (we'll repack into one jar at the end of this)
+	echo "Unpacking linked library $lib"
+	$jarX $COMPILE_ROOT/$lib
+done
+
+# dump main class info into manifest
+echo "Writing jar manifest file"
+echo "Main-Class: $MAIN" > $MANIFEST
+
+# actually compile jar, put in previous directory
+echo "Compiling executable jar file $EXEC"
+$jarC $COMPILE_ROOT/$EXEC $MANIFEST *
+
+# cd back up and clean up
+echo "Exiting build directory"
+cd $COMPILE_ROOT
+echo "Removing build directory"
+rm -rf $BINDIR
