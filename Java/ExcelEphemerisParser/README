@@ -1,7 +1,7 @@
 GitHub URL: https://github.com/uwbadger11208/exo-lunar
 
 Download URL for pre-made executable JAR:
-https://github.com/uwbadger11208/exo-lunar/Java/ExcelEphemerisParser/ephparse.jar
+https://github.com/uwbadger11208/exo-lunar/tree/master/Java/ExcelEphemerisParser/ephparse.jar
 
 To build JAR executable from source:
 > git clone https://github.com/uwbadger11208/exo-lunar.git
