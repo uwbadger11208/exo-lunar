@@ -337,6 +337,10 @@ public class Ephemeris {
 			if (start == null)
 				throw new BadTransferException("bad crater value");
 			break;
+		case "xlimb":
+			if (orig_dir == null)
+				throw new BadTransferException("bad origin value");
+			start = getLimbRaDec(craterName,orig_dir,0); break;
 		case "limb":
 			if (orig_dir == null)
 				throw new BadTransferException("bad origin value");

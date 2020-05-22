@@ -87,6 +87,7 @@ public class LibrationEphemeris {
 		craters.put("scheiner", new Double[]		{-27.8,-60.5});
 		craters.put("moon center", new Double[] 	{  0.0,  0.0});
 		craters.put("mons rumker", new Double[]     {-58.1, 40.8});
+		craters.put("w equator", new Double[]       { 55.2,  4.6});
 		
 		return craters;
 	}
